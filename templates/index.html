@@ -1,0 +1,38 @@
+<!DOCTYPE html>
+<html lang="zh-Hant">
+<head>
+    <meta charset="UTF-8">
+    <title>電腦資料架構瀏覽器</title>
+</head>
+<body>
+    <h2>📂 電腦資料瀏覽</h2>
+    <button onclick="loadDir('C:\\')">列出 C 槽內容</button>
+    <ul id="file-list"></ul>
+
+    <script>
+        async function loadDir(path) {
+            const res = await fetch(`/list_dir?path=${encodeURIComponent(path)}`);
+            const data = await res.json();
+
+            const list = document.getElementById('file-list');
+            list.innerHTML = '';
+
+            if (data.error) {
+                list.innerHTML = `<li>❌ 錯誤：${data.error}</li>`;
+                return;
+            }
+
+            list.innerHTML = `<li><b>目前路徑：</b> ${data.path}</li>`;
+            data.entries.forEach(item => {
+                const li = document.createElement('li');
+                li.textContent = (item.is_dir ? "📁 " : "📄 ") + item.name;
+                if (item.is_dir) {
+                    li.style.cursor = 'pointer';
+                    li.onclick = () => loadDir(item.path);
+                }
+                list.appendChild(li);
+            });
+        }
+    </script>
+</body>
+</html>
